@@ -1,7 +1,7 @@
 {
-  "name": "n8n-nodes-<...>",
+  "name": "n8n-nodes-pohoda",
   "version": "0.1.0",
-  "description": "",
+  "description": "N8N Node for Pohoda Stormware",
   "keywords": [
     "n8n-community-node-package"
   ],
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/vladaman/n8n-nodes-pohoda.git"
   },
   "engines": {
     "node": ">=18.10",
@@ -55,5 +55,10 @@
   },
   "peerDependencies": {
     "n8n-workflow": "*"
+  },
+  "dependencies": {
+    "iconv": "^3.0.1",
+    "iconv-lite": "^0.6.3",
+    "xmlbuilder2": "^3.1.1"
   }
 }

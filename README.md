@@ -1,46 +1,47 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-pohoda
 
-# n8n-nodes-starter
+This is an n8n community node that allows you to integrate **Pohoda by Stormware** into your n8n workflows.
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](n8n.io). It includes the node linter and other dependencies.
+**Pohoda** is a comprehensive accounting software that leverages the **mServer XML API** to enable seamless automation of daily accounting operations. By integrating Pohoda with n8n, you can fully automate your business processes, especially when combined with AI tools.
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-## Prerequisites
+[Installation](#installation)  
+[Operations](#operations)  
+[Credentials](#credentials)  
+[Compatibility](#compatibility)  
+[Usage](#usage)  
+[Resources](#resources)  
+[Version history](#version-history)
 
-You need the following installed on your development machine:
+## Installation
 
-* [git](https://git-scm.com/downloads)
-* Node.js and pnpm. Minimum version Node 18. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  pnpm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation to install this node.
 
-## Using this starter
+## Operations
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+This node supports the following operations:
+- **Create Invoice**: Generate and send invoices directly from Pohoda.
+- **Update Customer**: Modify customer details in your Pohoda database.
+- **Fetch Orders**: Retrieve order data from Pohoda for further processing.
+- **Generate Reports**: Automate the creation of financial reports.
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `pnpm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `pnpm lint` to check for errors or `pnpm lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+## Credentials
 
-## More information
+To use this node, you need to authenticate with Pohoda's mServer XML API. Follow these steps:
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+1. **Prerequisites**: Ensure you have an active Pohoda account and access to the mServer XML API.
+2. **Authentication**: Use API keys or OAuth2 for authentication. Provide the necessary credentials in the node configuration.
+3. **Setup**: Enter your API endpoint, username, and password (or API key) in the credentials section of the node.
 
-## License
+## Compatibility
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+- **Tested Versions**: 1.71.3
+
+## Usage
+
+This node is designed to simplify the integration of Pohoda with n8n workflows. Here are some tips for getting started:
+
+- **Automate Invoicing**: Use the **Create Invoice** operation to automatically generate invoices based on triggers from other apps.
+- **Sync Customer Data**: Keep your customer records up-to-date by syncing data between Pohoda and other CRM systems.
+- **Generate Financial Reports**: Schedule automated report generation to streamline your accounting processes.
