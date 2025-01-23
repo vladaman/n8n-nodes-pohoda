@@ -163,6 +163,14 @@ export class PohodaNode implements INodeType {
 						name: 'Received Advance Invoice',
 						value: 'receivedAdvanceInvoice'
 					},
+					{
+						name: 'Cash Paid',
+						value: 'cashPaid'
+					},
+					{
+						name: 'Internal Document',
+						value: 'internalDocument'
+					},
 				]
 			},
 

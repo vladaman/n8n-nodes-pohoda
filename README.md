@@ -4,6 +4,10 @@ This is an n8n community node that allows you to integrate **Pohoda by Stormware
 
 **Pohoda** is a comprehensive accounting software that leverages the **mServer XML API** to enable seamless automation of daily accounting operations. By integrating Pohoda with n8n, you can fully automate your business processes, especially when combined with AI tools.
 
+![workflow.png](docs%2Fimages%2Fworkflow.png)
+
+![screen_node.png](docs%2Fimages%2Fscreen_node.png)
+
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
 [Installation](#installation)  
