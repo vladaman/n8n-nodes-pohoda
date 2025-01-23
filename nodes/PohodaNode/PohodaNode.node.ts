@@ -1,11 +1,11 @@
-import type {
+import {
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
-	INodeTypeDescription,
+	INodeTypeDescription, NodeApiError,
 } from 'n8n-workflow';
 import {NodeConnectionType, NodeOperationError} from 'n8n-workflow';
-import {generateListInvoicesRequest} from './utils/xmlGenerator';
+import {generateListRequest, ListInvoicesFilter, ListLimit} from './utils/xmlGenerator';
 import iconv from 'iconv-lite';
 import {convert} from 'xmlbuilder2';
 
@@ -81,64 +81,64 @@ export class PohodaNode implements INodeType {
 					},
 					{
 						name: 'Výdejky',
-						value: 'Vydejky',
+						value: 'listVydejkaRequest',
 						description: 'Issues agenda.',
 					},
 					{
 						name: 'Pokladní doklady',
-						value: 'PokladniDoklady',
+						value: 'listVoucherRequest',
 						description: 'Cash register documents agenda.',
 					},
 					{
 						name: 'Nabídky',
-						value: 'Nabidky',
+						value: 'listOfferRequest',
 						description: 'Offers agenda.',
 					},
 					{
 						name: 'Výroba',
-						value: 'Vyroba',
+						value: 'listVyrobaRequest',
 						description: 'Production agenda.',
 					},
 					{
 						name: 'Interní doklady',
-						value: 'InterniDoklady',
+						value: 'listIntDocRequest',
 						description: 'Internal documents agenda.',
 					},
 					{
 						name: 'Poptávky',
-						value: 'Poptavky',
+						value: 'listEnquiryRequest',
 						description: 'Enquiries agenda.',
 					},
 					{
 						name: 'Převod',
-						value: 'Prevod',
+						value: 'listPrevodkaRequest',
 						description: 'Transfers agenda.',
 					},
 					{
 						name: 'Banka',
-						value: 'Banka',
+						value: 'listBankRequest',
 						description: 'Bank agenda.',
 					},
 					{
 						name: 'Zakázky',
-						value: 'Zakazky',
+						value: 'listContractRequest',
 						description: 'Contracts agenda.',
 					},
 					{
 						name: 'Pohyby',
-						value: 'Pohyby',
+						value: 'listMovementRequest',
 						description: 'Movements agenda.',
 					},
 					{
 						name: 'Účetní deník (PÚ)',
-						value: 'UcetniDenikPU',
+						value: 'listAccountancyRequest',
 						description: 'Accounting journal (PÚ) agenda.',
 					},
 				],
 			},
 			{
 				displayName: 'Invoice Type',
-				name: 'invoiceType',
+				name: 'entityDetailType',
 				type: 'options',
 				default: 'issuedInvoice',
 				displayOptions: {
@@ -162,15 +162,7 @@ export class PohodaNode implements INodeType {
 					{
 						name: 'Received Advance Invoice',
 						value: 'receivedAdvanceInvoice'
-					},
-					{
-						name: 'Cash Paid',
-						value: 'cashPaid'
-					},
-					{
-						name: 'Internal Document',
-						value: 'internalDocument'
-					},
+					}
 				]
 			},
 
@@ -224,13 +216,6 @@ export class PohodaNode implements INodeType {
 						description: 'Filter invoices by last changes date',
 					},
 					{
-						displayName: 'Last Changes',
-						name: 'lastChanges',
-						type: 'dateTime',
-						default: '',
-						description: 'Filter invoices by last changes date',
-					},
-					{
 						displayName: 'Company Name',
 						name: 'companyName',
 						type: 'string',
@@ -260,6 +245,19 @@ export class PohodaNode implements INodeType {
 				description: 'Range 1 to 10000',
 			},
 
+			{
+				displayName: 'Start Record ID',
+				name: 'idFrom',
+				type: 'number',
+				default: "",
+				displayOptions: {
+					show: {
+						operation: ['export'],
+					},
+				},
+				description: 'Minimální hodnota ID záznamu, od kterého se provede export',
+			},
+
 			// Invoice Header
 			{
 				displayName: 'Invoice Header',
@@ -281,7 +279,13 @@ export class PohodaNode implements INodeType {
 				options: [
 					{
 						displayName: 'Invoice Type',
-						name: 'invoiceType',
+						name: 'entityDetailType',
+						displayOptions: {
+							show: {
+								operation: ['export'],
+								actionEntity: ['listInvoiceRequest'],
+							}
+						},
 						type: 'options',
 						options: [
 							{name: 'Issued Invoice', value: 'issuedInvoice'},
@@ -330,7 +334,6 @@ export class PohodaNode implements INodeType {
 					},
 				],
 			},
-
 
 
 			// Invoice Items
@@ -462,17 +465,12 @@ export class PohodaNode implements INodeType {
 				const utfConvert = this.getNodeParameter('utfConvert', itemIndex) as boolean;
 
 				if (operation === 'export') {
-					const invoiceType = this.getNodeParameter('invoiceType', itemIndex) as string;
-					const filter = this.getNodeParameter('filter', itemIndex, {}) as {
-						id?: string;
-						extId?: string;
-						dateFrom?: string;
-						dateTill?: string;
-						lastChanges?: string;
-						selectedIco?: string;
-						companyName?: string;
-						count?: number;
-					};
+					const filter = this.getNodeParameter('filter', itemIndex, {}) as ListInvoicesFilter;
+
+					const limit = {
+						count: this.getNodeParameter('count', itemIndex) as number,
+						idFrom: this.getNodeParameter('idFrom', itemIndex) as number
+					} as ListLimit;
 
 					// Ensure dateFrom and dateTill are in the correct format (YYYY-MM-DD)
 					if (filter.dateFrom) {
@@ -482,9 +480,69 @@ export class PohodaNode implements INodeType {
 						filter.dateTill = new Date(filter.dateTill).toISOString().split('T')[0];
 					}
 
-					const xmlRequest = generateListInvoicesRequest(credentials.ico as string, actionEntity, invoiceType, filter);
+					let xmlRequest;
+					if (actionEntity === 'listInvoiceRequest') {
+						const entityDetailType = this.getNodeParameter('entityDetailType', itemIndex) as string;
+						const listAttrs = {
+							version: '2.0',
+							invoiceType: entityDetailType,
+							invoiceVersion: '2.0',
+							request: 'lst:requestInvoice'
+						};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listBankRequest') {
+						const listAttrs = {version: '2.0', bankVersion: '2.0', request: 'lst:requestBank'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listAccountancyRequest') {
+						const listAttrs = {version: '2.0', accountancyVersion: '2.0', request: 'lst:requestAccountancy'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listIntDocRequest') {
+						const listAttrs = {version: '2.0', intDocVersion: '2.0', request: 'lst:requestIntDoc'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listVoucherRequest') {
+						const listAttrs = {version: '2.0', voucherVersion: '2.0', request: 'lst:requestVoucher'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listProdejkaRequest') {
+						const listAttrs = {version: '2.0', prodejkaVersion: '2.0', request: 'lst:requestProdejka'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listPrevodkaRequest') {
+						const listAttrs = {version: '2.0', prevodkaVersion: '2.0', request: 'lst:requestPrevodka'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listVyrobaRequest') {
+						const listAttrs = {version: '2.0', vyrobaVersion: '2.0', request: 'lst:requestVyroba'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listVydejkaRequest') {
+						const listAttrs = {version: '2.0', vydejkaVersion: '2.0', request: 'lst:requestVydejka'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listPrijemkaRequest') {
+						const listAttrs = {version: '2.0', prijemkaVersion: '2.0', request: 'lst:requestPrijemka'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listEnquiryRequest') {
+						const listAttrs = {version: '2.0', enquiryVersion: '2.0', request: 'lst:requestEnquiry'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listOfferRequest') {
+						const listAttrs = {version: '2.0', offerVersion: '2.0', request: 'lst:requestOffer'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listOrderRequest') {
+						// TODO missing selector for order type
+						const listAttrs = {
+							version: '2.0',
+							orderVersion: '2.0',
+							orderType: "issuedOrder",
+							request: 'lst:requestOrder'
+						};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else if (actionEntity === 'listMovementRequest') {
+						const listAttrs = {version: '2.0', movementVersion: '2.0', request: 'lst:requestMovement'};
+						xmlRequest = generateListRequest(credentials.ico as string, actionEntity, listAttrs, filter, limit);
+					} else {
+						throw new NodeApiError(this.getNode(), {
+							message: `Not implemented for ${actionEntity}`
+						});
+					}
+
+
 					console.log('Request', xmlRequest);
-					// Make the API request
 
 					const respBuffer = await this.helpers.httpRequest({
 						method: 'POST',
@@ -500,16 +558,45 @@ export class PohodaNode implements INodeType {
 						body: xmlRequest,
 					});
 
-					let xmlStr = utfConvert ? iconv.decode(respBuffer, "win1250").replace(`encoding="Windows-1250"`, `encoding="utf-8"`) : respBuffer.toString();
-					let jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"});
-					let respPack = jsonResponse["rsp:responsePack"];
-					console.log('res', respPack);
-					// Add the response to the return data
-					returnData.push({
-						json: {"data": xmlOutputFormat ? xmlStr : respPack['rsp:responsePackItem']},
-						error: respPack['@state'] === 'error' ? new NodeOperationError(this.getNode(), respPack['@note']) : undefined,
-						pairedItem: itemIndex,
-					});
+					const xmlStr = utfConvert ? iconv.decode(respBuffer, "win1250").replace(`encoding="Windows-1250"`, `encoding="utf-8"`) : respBuffer.toString();
+					const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
+					const respPack = jsonResponse["rsp:responsePack"] as any;
+
+					console.log('respPack', JSON.stringify(respPack, null, 4));
+
+					if (respPack['@state'] != "ok") {
+						throw new NodeApiError(this.getNode(), {
+							message: respPack['@note'],
+						});
+					}
+
+					const respPackItem = respPack['rsp:responsePackItem'] as any;
+					if (respPackItem['@state'] != "ok") {
+						throw new NodeApiError(this.getNode(), {
+							message: respPackItem['@note'],
+						});
+					}
+
+					if (xmlOutputFormat)
+						returnData.push({
+							json: {xml: xmlStr},
+							pairedItem: itemIndex,
+						});
+					else {
+						let extractedData = extractLstElements(respPackItem);
+						const outArray = Array.isArray(extractedData)
+							? extractedData
+							: [extractedData];
+
+						outArray.forEach((item: any) => {
+							returnData.push({
+								json: item,
+								pairedItem: itemIndex,
+							});
+						});
+					}
+
+
 				} else {
 					// Handle other operations (e.g., createInvoice, createCreditNote, etc.)
 					// ...
@@ -534,5 +621,18 @@ export class PohodaNode implements INodeType {
 		}
 
 		return [returnData];
+	}
+}
+
+function extractLstElements(obj: any): any {
+	for (const key in obj) {
+		if (key.startsWith('lst:')) {
+			let subObj = obj[key];
+			for (const key2 in subObj) {
+				if (key2.startsWith('lst:')) {
+					return subObj[key2];
+				}
+			}
+		}
 	}
 }
