@@ -1,6 +1,6 @@
 # n8n-nodes-pohoda
 
-Toto je n8n community node, který umožňuje integraci **Pohoda** od Stormware do vašich n8n workflow.
+Toto je n8n community node, který umožňuje integraci **Pohoda** mServer od Stormware do vašich n8n workflow.
 
 **Pohoda** je komplexní účetní software využívající **mServer XML API**, které umožňuje automatizaci každodenních
 účetních operací. Díky integraci Pohoda s n8n můžete plně automatizovat své obchodní procesy, obzvláště v kombinaci s AI
@@ -8,6 +8,8 @@ nástroji.
 
 ![workflow](docs/images/workflow.png)
 ![screen_node](docs/images/screen_node.png)
+![mcp_client](docs/images/mcp_client_setup.png)
+![example_agent](docs/images/agent_example.png)
 
 [n8n](https://n8n.io/) je platforma pro automatizaci
 workflow [licencovaná fair-code licencí](https://docs.n8n.io/reference/license/).
@@ -47,16 +49,32 @@ Pro použití tohoto nodu je třeba autentizovat se do mServer XML API Pohody. P
 
 ## Kompatibilita
 
-Testováno na verzích Pohody: 1.71.3
+Testováno na verzích Pohody: 1.71.3 a n8n v1.88.0
 
 ## Použití
 
-Tento node byl navržen tak, aby zjednodušil integraci Pohody do n8n workflow. Tipy pro začátek:
+Tento node byl navržen tak, aby zjednodušil integraci Pohody do n8n workflow případně napojil Poohoda ERP na AI. Tipy pro začátek:
 
-- **Automatizace fakturace**: použijte operaci "Vytvořit fakturu" pro automatické generování faktur na základě triggerů
-	z jiných aplikací.
-- **Synchronizace zákaznických dat**: udržujte údaje o zákaznících aktuální synchronizací mezi Pohodou a CRM systémy.
+## Použití
+
+Tento node byl navržen tak, aby zjednodušil integraci Pohody do n8n workflow případně napojil Pohoda ERP na AI. Tipy pro začátek:
+
+- **Automatizace fakturace**: použijte operaci "Vytvořit fakturu" pro automatické generování faktur na základě triggerů z jiných aplikací.
+- **Kontrola zaúčtováni**: při propojení s AI modely (Např. OpenAI nebo Gemini) nechte N8N automaticky pracovat a provádět kontrolu zaúčtovaných dokladů.
+- **Synchronizace zákaznických dat**: udržujte údaje o zákaznících aktuální synchronizací mezi Pohodou, CRM nebo pokladními systémy.
 - **Generování finančních reportů**: naplánujte automatické vytváření reportů pro zefektivnění účetních procesů.
+- **Automatické sledování plateb**: nastavte workflow, které automaticky aktualizuje stav faktur v Pohodě na základě příchozích plateb od zákazníků.
+- **Notifikace o zásobách**: vytvořte workflow, které vás upozorní, když klesnou zásoby pod určitou hranici, a to pomocí integrace s e-shopem nebo skladem.
+- **Import a export dat**: automatizujte import dodavatelských faktur nebo export dat pro analýzu pomocí externích nástrojů, jako je Shoptet nebo Abra Flexi.
+- **Sledování objednávek**: integrujte Pohodu se systémem sledování objednávek, aby se automaticky aktualizoval stav objednávek a zákazníci byli informováni o jejich pokroku.
+- **Zpracování opakovaných plateb**: nastavte automatizaci pro zpracování opakovaných plateb a fakturaci zákazníkům, kteří mají předplatné služby.
+- **Integrace s marketingovými nástroji**: propojte Pohodu s nástroji pro e-mailový marketing, abyste mohli automaticky aktualizovat seznamy příjemců na základě zákaznických dat.
+- **Zpracování vratek**: vytvořte workflow pro efektivní zpracování vratek a reklamací, které automaticky upraví stavy v systému Pohoda.
+- **Automatizace reportů o prodeji**: naplánujte pravidelné reporty o prodeji, které se automaticky generují a zasílají relevantním členům týmu.
+- **Správa dodavatelských smluv**: integrujte správu smluv s dodavateli do vašich pracovních postupů, aby byla zajištěna jejich aktualizace a dodržování podmínek.
+- **Zlepšení zákaznického servisu**: propojte Pohodu s chatovacími nástroji, aby se zákaznické požadavky automaticky přeposílaly na příslušné oddělení nebo zaměstnance.
+
+Tyto nápady vám mohou pomoci efektivně využít n8n a zjednodušit pracovní procesy v Pohoda ERP.
 
 ## Zdroje
 
