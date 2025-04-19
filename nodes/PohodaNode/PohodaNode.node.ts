@@ -4,8 +4,14 @@ import {
 	INodeType,
 	INodeTypeDescription, NodeApiError,
 } from 'n8n-workflow';
+
 import {NodeConnectionType, NodeOperationError} from 'n8n-workflow';
-import {generateListRequest, ListInvoicesFilter, ListLimit} from './utils/xmlGenerator';
+import {
+	generateListRequest,
+	generatePrintRequest,
+	ListInvoicesFilter,
+	ListLimit
+} from './utils/xmlGenerator';
 import iconv from 'iconv-lite';
 import {convert} from 'xmlbuilder2';
 
@@ -49,6 +55,10 @@ export class PohodaNode implements INodeType {
 						name: 'Company Info',
 						value: 'company-info',
 					},
+					{
+						name: 'Print',
+						value: 'print',
+					},
 				],
 				type: 'options'
 			},
@@ -61,7 +71,7 @@ export class PohodaNode implements INodeType {
 						operation: ['export', 'import'],
 					},
 				},
-				name: 'actionEntity',
+				name: 'resource',
 				options: [
 					{
 						name: 'Faktury',
@@ -163,7 +173,7 @@ export class PohodaNode implements INodeType {
 				default: 'issuedInvoice',
 				displayOptions: {
 					show: {
-						actionEntity: ['lst:listInvoiceRequest'],
+						resource: ['lst:listInvoiceRequest'],
 						operation: ['export', 'import']
 					},
 				},
@@ -187,13 +197,207 @@ export class PohodaNode implements INodeType {
 				]
 			},
 
-			// Filter for listing invoices
 			{
-				default: {},
-				displayName: 'Filter',
+				displayName: 'Entity',
+				type: 'options',
+				default: "adresar",
 				displayOptions: {
 					show: {
-						actionEntity: ['lst:listInvoiceRequest', "lst:listAccountancyRequest",
+						operation: ['print'],
+					},
+				},
+				name: 'resource',
+				options: [
+					{
+						name: 'Adresář',
+						value: 'adresar',
+						description: 'Seznam kontaktů a adres.'
+					},
+					{
+						name: 'Banka',
+						value: 'banka',
+						description: 'Informace o bankovních účtech a transakcích.'
+					},
+					{
+						name: 'Cenové akce',
+						value: 'cenove_akce',
+						description: 'Akce a slevy na produkty.'
+					},
+					{
+						name: 'Cenové skupiny',
+						value: 'cenove_skupiny',
+						description: 'Skupiny cen produktů.'
+					},
+					{
+						name: 'Členění skladu',
+						value: 'cleneni_skladu',
+						description: 'Organizace a členění skladových položek.'
+					},
+					{
+						name: 'Evidenční čísla',
+						value: 'evidencni_cisla',
+						description: 'Seznam evidenčních čísel pro jednotlivé položky.'
+					},
+					{
+						name: 'Interní doklady',
+						value: 'interni_doklady',
+						description: 'Dokumenty používané uvnitř firmy.'
+					},
+					{
+						name: 'Inventura',
+						value: 'inventura',
+						description: 'Seznam položek při inventarizaci.'
+					},
+					{
+						name: 'Inventurní seznamy',
+						value: 'inventurni_seznamy',
+						description: 'Seznamy pro inventarizaci zboží.'
+					},
+					{
+						name: 'Ostatní pohledávky',
+						value: 'ostatni_pohledavky',
+						description: 'Pohledávky, které nejsou zahrnuty v jiných kategoriích.'
+					},
+					{
+						name: 'Ostatní závazky',
+						value: 'ostatni_zavazky',
+						description: 'Závazky, které nejsou zahrnuty v jiných kategoriích.'
+					},
+					{
+						name: 'Pohyby',
+						value: 'pohyby',
+						description: 'Historie pohybů v účetnictví.'
+					},
+					{
+						name: 'Pokladna',
+						value: 'pokladna',
+						description: 'Informace o pokladních transakcích.'
+					},
+					{
+						name: 'Převod',
+						value: 'prevod',
+						description: 'Převody mezi účty.'
+					},
+					{
+						name: 'Přijaté faktury',
+						value: 'prijate_faktury',
+						description: 'Faktury, které byly přijaty od dodavatelů.'
+					},
+					{
+						name: 'Přijaté nabídky',
+						value: 'prijate_nabidky',
+						description: 'Nabídky od dodavatelů.'
+					},
+					{
+						name: 'Přijaté objednávky',
+						value: 'prijate_objednavky',
+						description: 'Objednávky, které byly přijaty od zákazníků.'
+					},
+					{
+						name: 'Přijaté poptávky',
+						value: 'prijate_poptavky',
+						description: 'Poptávky od zákazníků.'
+					},
+					{
+						name: 'Přijaté zálohové faktury',
+						value: 'prijate_zalohove_faktury',
+						description: 'Zálohové faktury, které byly přijaty.'
+					},
+					{
+						name: 'Přijemky',
+						value: 'prijemky',
+						description: 'Záznamy o přijetí zboží.'
+					},
+					{
+						name: 'Prodejky',
+						value: 'prodejky',
+						description: 'Doklady o prodeji zboží.'
+					},
+					{
+						name: 'Prodejní ceny',
+						value: 'prodejni_ceny',
+						description: 'Ceny, za které se prodává zboží.'
+					},
+					{
+						name: 'Reklamace',
+						value: 'reklamace',
+						description: 'Záznamy o reklamovaných produktech.'
+					},
+					{
+						name: 'Servis',
+						value: 'servis',
+						description: 'Údržba a opravy produktů.'
+					},
+					{
+						name: 'Sklady',
+						value: 'sklady',
+						description: 'Informace o skladech a jejich obsahu.'
+					},
+					{
+						name: 'Uživatelská agenda',
+						value: 'uzivatelska_agenda',
+						description: 'Speciální agenda definována uživateli.'
+					},
+					{
+						name: 'Vydané faktury',
+						value: 'vydane_faktury',
+						description: 'Faktury, které byly vydány zákazníkům.'
+					},
+					{
+						name: 'Vydané nabídky',
+						value: 'vydane_nabidky',
+						description: 'Nabídky, které byly vydány zákazníkům.'
+					},
+					{
+						name: 'Vydané objednávky',
+						value: 'vydane_objednavky',
+						description: 'Objednávky, které byly vydány zákazníkům.'
+					},
+					{
+						name: 'Vydané poptávky',
+						value: 'vydane_poptavky',
+						description: 'Poptávky, které byly vydány dodavatelům.'
+					},
+					{
+						name: 'Vydané zálohové faktury',
+						value: 'vydane_zalohove_faktury',
+						description: 'Zálohové faktury, které byly vydány.'
+					},
+					{
+						name: 'Výdejky',
+						value: 'vydejky',
+						description: 'Záznamy o výdeji zboží.'
+					},
+					{
+						name: 'Výroba',
+						value: 'vyroba',
+						description: 'Záznamy o výrobě produktů.'
+					},
+					{
+						name: 'Výrobní požadavky',
+						value: 'vyrobni_pozadavky',
+						description: 'Požadavky na výrobu.'
+					},
+					{
+						name: 'Zakázky',
+						value: 'zakazky',
+						description: 'Záznamy o zakázkách.'
+					},
+					{
+						name: 'Zásoby',
+						value: 'zasoby',
+						description: 'Seznam všech skladových zásob.'
+					}
+				]
+			},
+
+			// Filter for listing invoices
+			{
+				displayName: 'Filter',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['lst:listInvoiceRequest', "lst:listAccountancyRequest",
 							"lst:listVoucherRequest",
 							"lst:listIntDocRequest",
 							"lst:listProdejkaRequest",
@@ -271,6 +475,48 @@ export class PohodaNode implements INodeType {
 			},
 
 			{
+				// eslint-disable-next-line
+				displayName: 'ID záznamu',
+				name: 'recordId',
+				type: 'number',
+				default: null,
+				displayOptions: {
+					show: {
+						operation: ['print'],
+					},
+				},
+				description: 'Item Row ID',
+			},
+
+			{
+				// eslint-disable-next-line
+				displayName: 'ID sestavy',
+				name: 'reportId',
+				type: 'number',
+				default: null,
+				displayOptions: {
+					show: {
+						operation: ['print'],
+					},
+				},
+				description: 'Identifikátor sestavy. Hodnotu naleznete ve vlastnostech sestavy.',
+			},
+
+			{
+				// eslint-disable-next-line
+				displayName: 'Název/cesta k souboru',
+				name: 'fileName',
+				type: 'string',
+				default: "n8n.pdf",
+				displayOptions: {
+					show: {
+						operation: ['print'],
+					},
+				},
+				description: 'Cesta k souboru a název kam bude uložen',
+			},
+
+			{
 				displayName: 'Return Records Count',
 				name: 'count',
 				type: 'number',
@@ -319,7 +565,7 @@ export class PohodaNode implements INodeType {
 						displayOptions: {
 							show: {
 								operation: ['export'],
-								actionEntity: [
+								resource: [
 									"lst:listInvoiceRequest"
 								]
 							}
@@ -493,18 +739,94 @@ export class PohodaNode implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		let scope = this;
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 		const credentials = await this.getCredentials('pohodaAuthApi');
 
+		async function processXmlRequest(xmlRequest: string, itemIndex: number) {
+			const credentials = await scope.getCredentials('pohodaAuthApi');
+			const xmlOutputFormat = scope.getNodeParameter('xmlOutput', itemIndex) as boolean;
+			const utfConvert = scope.getNodeParameter('utfConvert', itemIndex) as boolean;
+			const pohodaUrl = `${credentials.baseUrl}/xml`;
+			console.log(`Request to ${pohodaUrl}`, xmlRequest);
+			// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/xml
+			const respBuffer = await scope.helpers.httpRequest({
+				method: 'POST',
+				encoding: 'arraybuffer',
+				url: pohodaUrl,
+				headers: {
+					'Content-Type': 'application/xml',
+					'STW-Application': 'N8N Pohoda Node',
+					'STW-Authorization': `Basic ${Buffer.from(
+						`${credentials.username}:${credentials.password}`,
+					).toString('base64')}`,
+				},
+				body: xmlRequest,
+			});
+
+			const xmlStr = utfConvert ? iconv.decode(respBuffer, "win1250").replace(`encoding="Windows-1250"`, `encoding="utf-8"`) : respBuffer.toString();
+			const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
+			const respPack = jsonResponse["rsp:responsePack"] as any;
+
+			console.log('respPack', JSON.stringify(respPack, null, 4));
+
+			if (respPack['@state'] != "ok") {
+				throw new NodeApiError(scope.getNode(), {
+					// fix, url decode @note
+					message: respPack['@note'],
+				});
+			}
+
+			const respPackItem = respPack['rsp:responsePackItem'] as any;
+			if (respPackItem['@state'] != "ok") {
+				throw new NodeApiError(scope.getNode(), {
+					message: respPackItem['@note'],
+				});
+			}
+
+			if (xmlOutputFormat)
+				returnData.push({
+					json: {xml: xmlStr},
+					pairedItem: itemIndex,
+				});
+			else if (respPackItem['prn:printResponse'] && respPackItem['prn:printResponse']['rdc:printDetails']) {
+				let binary = respPackItem['prn:printResponse']['rdc:printDetails']['rdc:attachments']['rdc:attachment']['rdc:data']['#'];
+				let fileName = respPackItem['prn:printResponse']['rdc:printDetails']['rdc:attachments']['rdc:attachment']['rdc:data']['@fileName'];
+				delete respPackItem['prn:printResponse']['rdc:printDetails']['rdc:attachments']['rdc:attachment']['rdc:data'];
+				returnData.push({
+					json: respPackItem['prn:printResponse']['rdc:printDetails'],
+					binary: {
+						"data": {
+							data: binary,
+							mimeType: "application/pdf",
+							fileExtension: 'pdf',
+							fileName: fileName
+						}
+					},
+					pairedItem: itemIndex,
+				});
+			} else {
+				let extractedData = extractLstElements(respPackItem);
+				const outArray = Array.isArray(extractedData)
+					? extractedData
+					: [extractedData];
+
+				outArray.forEach((item: any) => {
+					returnData.push({
+						json: item,
+						pairedItem: itemIndex,
+					});
+				});
+			}
+		}
+
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
 				const operation = this.getNodeParameter('operation', itemIndex) as string;
-				const xmlOutputFormat = this.getNodeParameter('xmlOutput', itemIndex) as boolean;
-				const utfConvert = this.getNodeParameter('utfConvert', itemIndex) as boolean;
 
 				if (operation === 'export') {
-					const actionEntity = this.getNodeParameter('actionEntity', itemIndex) as string;
+					const actionEntity = this.getNodeParameter('resource', itemIndex) as string;
 					const filter = this.getNodeParameter('filter', itemIndex, {}) as ListInvoicesFilter;
 
 					const limit = {
@@ -590,69 +912,16 @@ export class PohodaNode implements INodeType {
 						});
 					}
 
-					const pohodaUrl = `${credentials.baseUrl}/xml`;
-					console.log(`Request to ${pohodaUrl}`, xmlRequest);
-
-					// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/xml
-					const respBuffer = await this.helpers.httpRequest({
-						method: 'POST',
-						encoding: 'arraybuffer',
-						url: pohodaUrl,
-						headers: {
-							'Content-Type': 'application/xml',
-							'STW-Application': 'N8N Pohoda Node',
-							'STW-Authorization': `Basic ${Buffer.from(
-								`${credentials.username}:${credentials.password}`,
-							).toString('base64')}`,
-						},
-						body: xmlRequest,
-					});
-
-					const xmlStr = utfConvert ? iconv.decode(respBuffer, "win1250").replace(`encoding="Windows-1250"`, `encoding="utf-8"`) : respBuffer.toString();
-					const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
-					const respPack = jsonResponse["rsp:responsePack"] as any;
-
-					// console.log('respPack', JSON.stringify(respPack, null, 4));
-
-					if (respPack['@state'] != "ok") {
-						throw new NodeApiError(this.getNode(), {
-							// fix, url decode @note
-							message: respPack['@note'],
-						});
-					}
-
-					const respPackItem = respPack['rsp:responsePackItem'] as any;
-					if (respPackItem['@state'] != "ok") {
-						throw new NodeApiError(this.getNode(), {
-							message: respPackItem['@note'],
-						});
-					}
-
-					if (xmlOutputFormat)
-						returnData.push({
-							json: {xml: xmlStr},
-							pairedItem: itemIndex,
-						});
-					else {
-						let extractedData = extractLstElements(respPackItem);
-						const outArray = Array.isArray(extractedData)
-							? extractedData
-							: [extractedData];
-
-						outArray.forEach((item: any) => {
-							returnData.push({
-								json: item,
-								pairedItem: itemIndex,
-							});
-						});
-					}
+					await processXmlRequest(xmlRequest, itemIndex);
 
 				} else if (operation === 'import') {
-					const actionEntity = this.getNodeParameter('actionEntity', itemIndex) as string;
+					const actionEntity = this.getNodeParameter('resource', itemIndex) as string;
 					if (actionEntity === 'lst:listInvoiceRequest') {
 						console.error('Not implemented import for invoice');
 					}
 				} else if (operation === 'company-info') {
+					const xmlOutputFormat = scope.getNodeParameter('xmlOutput', itemIndex) as boolean;
+					const utfConvert = scope.getNodeParameter('utfConvert', itemIndex) as boolean;
 					const pohodaUrl = `${credentials.baseUrl}/status?companyDetail`;
 					// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/status?companyDetail
 					const respBuffer = await this.helpers.httpRequest({
@@ -680,7 +949,16 @@ export class PohodaNode implements INodeType {
 							json: jsonResponse.mServer,
 							pairedItem: itemIndex,
 						});
+				} else if (operation === 'print') {
+					const agenda = this.getNodeParameter('resource', itemIndex) as string;
+					const recordId = this.getNodeParameter('recordId', itemIndex) as string;
+					const reportId = this.getNodeParameter('reportId', itemIndex) as string;
+					const fileName = this.getNodeParameter('fileName', itemIndex) as string;
 
+					let xmlRequest = generatePrintRequest(credentials.ico as string, agenda, reportId, recordId, fileName);
+					// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/xml
+
+					await processXmlRequest(xmlRequest, itemIndex);
 				} else {
 					// Import
 					// Handle other operations (e.g., createInvoice, createCreditNote, etc.)

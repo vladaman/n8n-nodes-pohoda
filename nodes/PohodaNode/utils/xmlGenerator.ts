@@ -18,16 +18,8 @@ export interface ListLimit {
 	idFrom?: number;
 }
 
-export function generateListRequest(entityIco: string, actionEntity: string, listAttrs: any, filter: ListInvoicesFilter, limit?: ListLimit): string {
-	const {id, extId, dateFrom, dateTill, lastChanges, ico, companyName} = filter;
-
-	let reqEntity = listAttrs.request;
-	delete listAttrs.request;
-
-	let prefix = actionEntity.split(":")[0];
-
-	// Create the XML document
-	const xml = create({version: '1.0', encoding: 'Windows-1250'})
+function createRootEnvelope(entityIco: string) {
+	return create({version: '1.0', encoding: 'Windows-1250'})
 		.ele('dat:dataPack', {
 			id: '001',
 			ico: entityIco,
@@ -100,8 +92,44 @@ export function generateListRequest(entityIco: string, actionEntity: string, lis
 			"xmlns:uag": "http://www.stormware.cz/schema/version_2/userAgenda.xsd",
 			"xmlns:apf": "http://www.stormware.cz/schema/version_2/advancePartFulfilment.xsd"
 		})
-		.ele('dat:dataPackItem', {id: 'n8n-datapack1', version: '2.0'})
-		.ele(actionEntity, listAttrs);
+		.ele('dat:dataPackItem', {id: 'n8n-datapack1', version: '2.0'});
+}
+
+export function generatePrintRequest(entityIco: string, agenda: string, reportId: string, id: string, fileName: string): string {
+	const xml = createRootEnvelope(entityIco);
+
+	// Add the print request structure
+	const printElement = xml.ele('prn:print', {version: '1.0'});
+
+	// Add record element with agenda and filter
+	const recordElement = printElement.ele('prn:record', {agenda: agenda});
+	if (id)
+		recordElement.ele('ftr:filter').ele('ftr:id').txt(id).up().up(); // Add filter id
+
+	// Add printer settings
+	const printerSettings = printElement.ele('prn:printerSettings');
+
+	// Add report information
+	printerSettings.ele('prn:report').ele('prn:id').txt(reportId).up(); // Add report id
+
+	// Add PDF settings
+	const pdfElement = printerSettings.ele('prn:pdf');
+	pdfElement.ele('prn:fileName').txt(fileName); // Replace with your actual file name
+	const binaryDataElement = pdfElement.ele('prn:binaryData');
+	binaryDataElement.ele('prn:responseXml').txt('true'); // Set responseXml to true
+
+	return xml.end({prettyPrint: true});
+}
+
+export function generateListRequest(entityIco: string, actionEntity: string, listAttrs: any, filter: ListInvoicesFilter, limit?: ListLimit): string {
+	const {id, extId, dateFrom, dateTill, lastChanges, ico, companyName} = filter;
+
+	let reqEntity = listAttrs.request;
+	delete listAttrs.request;
+
+	let prefix = actionEntity.split(":")[0];
+
+	const xml = createRootEnvelope(entityIco).ele(actionEntity, listAttrs);
 
 	if (limit && (limit.count || limit.idFrom)) {
 		const limitElement = xml.ele(prefix + ':limit');
