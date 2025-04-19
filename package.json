@@ -28,7 +28,8 @@
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json"
+    "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json",
+    "generate:resources": "ts-node tools/generateResources.ts"
   },
   "files": [
     "dist"
@@ -49,7 +50,9 @@
     "gulp": "^4.0.2",
     "n8n-workflow": "*",
     "prettier": "^3.3.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "ts-node": "^10.9.1",
+    "fast-xml-parser": "^4.1.1"
   },
   "peerDependencies": {
     "n8n-workflow": "*"

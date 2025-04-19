@@ -9,7 +9,7 @@ export class PohodaAuthApi implements ICredentialType {
 	name = 'pohodaAuthApi';
 	displayName = 'Pohoda mServer API';
 	documentationUrl = 'https://github.com/vladaman/n8n-nodes-pohoda';
-	icon: 'file:pohodaNode.png';
+	// icon = 'file:pohodaNode.png';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Company ICO',
