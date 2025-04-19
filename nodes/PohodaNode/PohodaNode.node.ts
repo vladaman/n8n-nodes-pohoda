@@ -33,8 +33,9 @@ export class PohodaNode implements INodeType {
 			// Operation selection
 			{
 				displayName: 'Operation',
+				default: 'export',
 				name: 'operation',
-				type: 'options',
+				noDataExpression: true,
 				options: [
 					{
 						name: 'Export',
@@ -44,8 +45,12 @@ export class PohodaNode implements INodeType {
 						name: 'Create Entity',
 						value: 'import',
 					},
+					{
+						name: 'Company Info',
+						value: 'company-info',
+					},
 				],
-				default: 'export'
+				type: 'options'
 			},
 
 			{
@@ -159,6 +164,7 @@ export class PohodaNode implements INodeType {
 				displayOptions: {
 					show: {
 						actionEntity: ['lst:listInvoiceRequest'],
+						operation: ['export', 'import']
 					},
 				},
 				options: [
@@ -187,7 +193,7 @@ export class PohodaNode implements INodeType {
 				displayName: 'Filter',
 				displayOptions: {
 					show: {
-						actionEntity: ['lst:listInvoiceRequest',	"lst:listAccountancyRequest",
+						actionEntity: ['lst:listInvoiceRequest', "lst:listAccountancyRequest",
 							"lst:listVoucherRequest",
 							"lst:listIntDocRequest",
 							"lst:listProdejkaRequest",
@@ -271,23 +277,6 @@ export class PohodaNode implements INodeType {
 				default: 10,
 				displayOptions: {
 					show: {
-						actionEntity: [
-							"lst:listInvoiceRequest",
-							"lst:listPrijemkaRequest",
-							"lst:listProdejkaRequest",
-							"lst:listOrderRequest",
-							"lst:listVydejkaRequest",
-							"lst:listVoucherRequest",
-							"lst:listOfferRequest",
-							"lst:listVyrobaRequest",
-							"lst:listIntDocRequest",
-							"lst:listEnquiryRequest",
-							"lst:listPrevodkaRequest",
-							"lst:listBankRequest",
-							"lst:listContractRequest",
-							"lst:listMovementRequest",
-							"lst:listAccountancyRequest"
-						],
 						operation: ['export'],
 					},
 				},
@@ -301,23 +290,6 @@ export class PohodaNode implements INodeType {
 				default: "",
 				displayOptions: {
 					show: {
-						actionEntity: [
-							"lst:listInvoiceRequest",
-							"lst:listPrijemkaRequest",
-							"lst:listProdejkaRequest",
-							"lst:listOrderRequest",
-							"lst:listVydejkaRequest",
-							"lst:listVoucherRequest",
-							"lst:listOfferRequest",
-							"lst:listVyrobaRequest",
-							"lst:listIntDocRequest",
-							"lst:listEnquiryRequest",
-							"lst:listPrevodkaRequest",
-							"lst:listBankRequest",
-							"lst:listContractRequest",
-							"lst:listMovementRequest",
-							"lst:listAccountancyRequest"
-						],
 						operation: ['export'],
 					},
 				},
@@ -528,11 +500,11 @@ export class PohodaNode implements INodeType {
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			try {
 				const operation = this.getNodeParameter('operation', itemIndex) as string;
-				const actionEntity = this.getNodeParameter('actionEntity', itemIndex) as string;
 				const xmlOutputFormat = this.getNodeParameter('xmlOutput', itemIndex) as boolean;
 				const utfConvert = this.getNodeParameter('utfConvert', itemIndex) as boolean;
 
 				if (operation === 'export') {
+					const actionEntity = this.getNodeParameter('actionEntity', itemIndex) as string;
 					const filter = this.getNodeParameter('filter', itemIndex, {}) as ListInvoicesFilter;
 
 					const limit = {
@@ -625,7 +597,7 @@ export class PohodaNode implements INodeType {
 					const respBuffer = await this.helpers.httpRequest({
 						method: 'POST',
 						encoding: 'arraybuffer',
-						url: pohodaUrl, // Replace with the actual API endpoint
+						url: pohodaUrl,
 						headers: {
 							'Content-Type': 'application/xml',
 							'STW-Application': 'N8N Pohoda Node',
@@ -640,7 +612,7 @@ export class PohodaNode implements INodeType {
 					const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
 					const respPack = jsonResponse["rsp:responsePack"] as any;
 
-					console.log('respPack', JSON.stringify(respPack, null, 4));
+					// console.log('respPack', JSON.stringify(respPack, null, 4));
 
 					if (respPack['@state'] != "ok") {
 						throw new NodeApiError(this.getNode(), {
@@ -662,8 +634,7 @@ export class PohodaNode implements INodeType {
 							pairedItem: itemIndex,
 						});
 					else {
-						let prefix = actionEntity.split(":")[0];
-						let extractedData = extractLstElements(prefix, respPackItem);
+						let extractedData = extractLstElements(respPackItem);
 						const outArray = Array.isArray(extractedData)
 							? extractedData
 							: [extractedData];
@@ -677,9 +648,39 @@ export class PohodaNode implements INodeType {
 					}
 
 				} else if (operation === 'import') {
+					const actionEntity = this.getNodeParameter('actionEntity', itemIndex) as string;
 					if (actionEntity === 'lst:listInvoiceRequest') {
-						console.log('xx1');
+						console.error('Not implemented import for invoice');
 					}
+				} else if (operation === 'company-info') {
+					const pohodaUrl = `${credentials.baseUrl}/status?companyDetail`;
+					// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/status?companyDetail
+					const respBuffer = await this.helpers.httpRequest({
+						method: 'GET',
+						encoding: 'arraybuffer',
+						url: pohodaUrl,
+						headers: {
+							'Content-Type': 'application/xml',
+							'STW-Application': 'N8N Pohoda Node',
+							'STW-Authorization': `Basic ${Buffer.from(
+								`${credentials.username}:${credentials.password}`,
+							).toString('base64')}`,
+						}
+					});
+
+					const xmlStr = utfConvert ? iconv.decode(respBuffer, "win1250").replace(`encoding="Windows-1250"`, `encoding="utf-8"`) : respBuffer.toString();
+					const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
+					if (xmlOutputFormat)
+						returnData.push({
+							json: {xml: xmlStr},
+							pairedItem: itemIndex,
+						});
+					else
+						returnData.push({
+							json: jsonResponse.mServer,
+							pairedItem: itemIndex,
+						});
+
 				} else {
 					// Import
 					// Handle other operations (e.g., createInvoice, createCreditNote, etc.)
@@ -708,12 +709,18 @@ export class PohodaNode implements INodeType {
 	}
 }
 
-function extractLstElements(prefix: string, obj: any): any {
+function extractLstElements(obj: any): any {
 	for (const key in obj) {
-		if (key.startsWith(prefix + ':')) {
+		if (key.includes(':')) {
 			let subObj = obj[key];
 			for (const key2 in subObj) {
-				if (key2.startsWith(prefix + ':')) {
+				if (key2.includes(':')) {
+					if (key2 === 'lst:accountancy') { // Hack
+						return subObj[key2]['act:accountingItem'];
+					}
+					if (Array.isArray(subObj[key2])) {
+						return subObj[key2];
+					}
 					return subObj[key2];
 				}
 			}
