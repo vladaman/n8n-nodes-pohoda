@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-pohoda",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "N8N Node for Pohoda Stormware",
   "keywords": [
     "n8n-community-node-package"

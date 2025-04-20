@@ -95,7 +95,7 @@ function createRootEnvelope(entityIco: string) {
 		.ele('dat:dataPackItem', {id: 'n8n-datapack1', version: '2.0'});
 }
 
-export function generatePrintRequest(entityIco: string, agenda: string, reportId: string, id: string, fileName: string): string {
+export function generatePrintRequest(entityIco: string, agenda: string, reportId: string, id: string, fileName: string, removeFile: boolean): string {
 	const xml = createRootEnvelope(entityIco);
 
 	// Add the print request structure
@@ -116,7 +116,9 @@ export function generatePrintRequest(entityIco: string, agenda: string, reportId
 	const pdfElement = printerSettings.ele('prn:pdf');
 	pdfElement.ele('prn:fileName').txt(fileName); // Replace with your actual file name
 	const binaryDataElement = pdfElement.ele('prn:binaryData');
-	binaryDataElement.ele('prn:responseXml').txt('true'); // Set responseXml to true
+	binaryDataElement.ele('prn:responseXml').txt('true');
+	if (removeFile)
+		binaryDataElement.ele('prn:removeFile').txt('true');
 
 	return xml.end({prettyPrint: true});
 }

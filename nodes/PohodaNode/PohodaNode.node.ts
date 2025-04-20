@@ -735,6 +735,19 @@ export class PohodaNode implements INodeType {
 				type: 'boolean',
 				default: true
 			},
+			{
+				displayName: 'Delete file after print',
+				name: 'deleteFile',
+				type: 'boolean',
+				default: true,
+				displayOptions: {
+					show: {
+						operation: [
+							"print"
+						],
+					},
+				},
+			},
 		],
 	};
 
@@ -748,8 +761,9 @@ export class PohodaNode implements INodeType {
 			const credentials = await scope.getCredentials('pohodaAuthApi');
 			const xmlOutputFormat = scope.getNodeParameter('xmlOutput', itemIndex) as boolean;
 			const utfConvert = scope.getNodeParameter('utfConvert', itemIndex) as boolean;
+
 			const pohodaUrl = `${credentials.baseUrl}/xml`;
-			console.log(`Request to ${pohodaUrl}`, xmlRequest);
+			// console.log(`Request to ${pohodaUrl}`, xmlRequest);
 			// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/xml
 			const respBuffer = await scope.helpers.httpRequest({
 				method: 'POST',
@@ -769,7 +783,7 @@ export class PohodaNode implements INodeType {
 			const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
 			const respPack = jsonResponse["rsp:responsePack"] as any;
 
-			console.log('respPack', JSON.stringify(respPack, null, 4));
+			// console.log('respPack', JSON.stringify(respPack, null, 4));
 
 			if (respPack['@state'] != "ok") {
 				throw new NodeApiError(scope.getNode(), {
@@ -954,8 +968,9 @@ export class PohodaNode implements INodeType {
 					const recordId = this.getNodeParameter('recordId', itemIndex) as string;
 					const reportId = this.getNodeParameter('reportId', itemIndex) as string;
 					const fileName = this.getNodeParameter('fileName', itemIndex) as string;
+					const deleteFile = scope.getNodeParameter('deleteFile', itemIndex) as boolean;
 
-					let xmlRequest = generatePrintRequest(credentials.ico as string, agenda, reportId, recordId, fileName);
+					let xmlRequest = generatePrintRequest(credentials.ico as string, agenda, reportId, recordId, fileName, deleteFile);
 					// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/xml
 
 					await processXmlRequest(xmlRequest, itemIndex);
