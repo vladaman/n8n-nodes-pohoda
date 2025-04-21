@@ -7,6 +7,7 @@ import {
 
 import {NodeConnectionType, NodeOperationError} from 'n8n-workflow';
 import {
+	generateCreateRequest,
 	generateListRequest,
 	generatePrintRequest,
 	ListInvoicesFilter,
@@ -21,7 +22,8 @@ export class PohodaNode implements INodeType {
 		name: 'pohodaNode',
 		group: ['transform'],
 		version: 1,
-		"icon": 'file:pohodaNode.png',
+		usableAsTool: true,
+		icon: 'file:pohodaNode.png',
 		description: 'Stormware Pohoda Integration Node',
 		defaults: {
 			name: 'Pohoda Node',
@@ -32,9 +34,19 @@ export class PohodaNode implements INodeType {
 				required: true,
 			},
 		],
+
+		// Add AI tool metadata
+		codex: {
+			categories: ["Search", "Web"],
+			alias: ["web-search", "searxng", "search-engine"],
+			subcategories: {
+				search: ["Web Search", "Metasearch"],
+			},
+		},
+
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		"inputs": [NodeConnectionType.Main],
-		"outputs": [NodeConnectionType.Main],
+		inputs: [NodeConnectionType.Main],
+		outputs: [NodeConnectionType.Main],
 		properties: [
 			// Operation selection
 			{
@@ -49,7 +61,7 @@ export class PohodaNode implements INodeType {
 					},
 					{
 						name: 'Create Entity',
-						value: 'import',
+						value: 'create',
 					},
 					{
 						name: 'Company Info',
@@ -64,11 +76,11 @@ export class PohodaNode implements INodeType {
 			},
 
 			{
-				"default": 'Faktury',
 				displayName: 'Entity',
+				default: 'lst:listInvoiceRequest',
 				displayOptions: {
 					show: {
-						operation: ['export', 'import'],
+						operation: ['export', 'create'],
 					},
 				},
 				name: 'resource',
@@ -77,6 +89,7 @@ export class PohodaNode implements INodeType {
 						name: 'Faktury',
 						value: 'lst:listInvoiceRequest',
 						description: 'Invoices agenda.',
+						displayName: 'List Invoices'
 					},
 					{
 						name: 'Příjemky',
@@ -174,7 +187,7 @@ export class PohodaNode implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['lst:listInvoiceRequest'],
-						operation: ['export', 'import']
+						operation: ['export', 'create']
 					},
 				},
 				options: [
@@ -475,6 +488,188 @@ export class PohodaNode implements INodeType {
 			},
 
 			{
+				"displayName": "Filter",
+				"default": {},
+				"placeholder": "Add Filter",
+				"type": "collection",
+				"displayOptions": {
+					"show": {
+						"resource": [
+							"lAdb:listAddressBookRequest"
+						],
+						"operation": [
+							"export"
+						]
+					}
+				},
+				"name": "filter",
+				"options": [
+					{
+						"displayName": "ID",
+						"name": "id",
+						"type": "string",
+						"default": "",
+						"description": "Vybere záznam dle zadaného ID."
+					},
+					{
+						"displayName": "Company",
+						"name": "company",
+						"type": "string",
+						"default": "",
+						"description": "Kontrola duplicity v poli Firma."
+					},
+					{
+						"displayName": "Name",
+						"name": "name",
+						"type": "string",
+						"default": "",
+						"description": "Kontrola duplicity v poli Jméno."
+					},
+					{
+						"displayName": "IČO",
+						"name": "ico",
+						"type": "string",
+						"default": "",
+						"description": "Kontrola duplicity v poli IČ."
+					},
+					{
+						"displayName": "DIČ",
+						"name": "dic",
+						"type": "string",
+						"default": "",
+						"description": "Kontrola duplicity v poli DIČ."
+					},
+					{
+						"displayName": "Last Changes",
+						"name": "lastChanges",
+						"type": "dateTime",
+						"default": "",
+						"description": "Vyexportuje záznamy změněné od zadaného data."
+					}
+				]
+			},
+
+
+			{
+				"displayName": "Entity Detail",
+				"default": {},
+				"placeholder": "Add Field",
+				"type": "collection",
+				"displayOptions": {
+					"show": {
+						"resource": [
+							"lAdb:listAddressBookRequest"
+						],
+						"operation": [
+							"create",
+							"update"
+						]
+					}
+				},
+				"name": "createEntity",
+				"options": [
+					{
+						"displayName": "Company",
+						"name": "company",
+						"type": "string",
+						"default": "",
+						"description": "Název firmy"
+					},
+					{
+						"displayName": "Name",
+						"name": "name",
+						"type": "string",
+						"default": "",
+						"description": "Jméno"
+					},
+					{
+						"displayName": "City",
+						"name": "city",
+						"type": "string",
+						"default": "",
+						"description": "Město"
+					},
+					{
+						"displayName": "Street",
+						"name": "street",
+						"type": "string",
+						"default": "",
+						"description": "Ulice"
+					},
+					{
+						"displayName": "ZIP Code",
+						"name": "zip",
+						"type": "string",
+						"default": "",
+						"description": "PSČ"
+					},
+					{
+						"displayName": "IČO",
+						"name": "ico",
+						"type": "string",
+						"default": "",
+						"description": "Company Registration ID - IČO"
+					},
+					{
+						"displayName": "DIČ",
+						"name": "dic",
+						"type": "string",
+						"default": "",
+						"description": "DIČ"
+					},
+					{
+						"displayName": "Phone",
+						"name": "phone",
+						"type": "string",
+						"default": "",
+						"description": "Telefon"
+					},
+					{
+						"displayName": "Mobile",
+						"name": "mobil",
+						"type": "string",
+						"default": "",
+						"description": "Mobil"
+					},
+					{
+						"displayName": "Email",
+						"name": "email",
+						"type": "string",
+						"default": "",
+						"description": "Email"
+					},
+					{
+						"displayName": "Website",
+						"name": "web",
+						"type": "string",
+						"default": "",
+						"description": "Webová stránka"
+					},
+					{
+						"displayName": "Message",
+						"name": "message",
+						"type": "string",
+						"default": "",
+						"description": "Zpráva"
+					},
+					{
+						"displayName": "Note",
+						"name": "note",
+						"type": "string",
+						"default": "",
+						"description": "Poznámka"
+					},
+					{
+						"displayName": "Internal Note",
+						"name": "intNote",
+						"type": "string",
+						"default": "",
+						"description": "Interní poznámka"
+					}
+				]
+			},
+
+			{
 				// eslint-disable-next-line
 				displayName: 'ID záznamu',
 				name: 'recordId',
@@ -730,7 +925,7 @@ export class PohodaNode implements INodeType {
 				default: false
 			},
 			{
-				displayName: 'Convert to UTF8',
+				displayName: 'UTF8 Conversion',
 				name: 'utfConvert',
 				type: 'boolean',
 				default: true
@@ -763,7 +958,7 @@ export class PohodaNode implements INodeType {
 			const utfConvert = scope.getNodeParameter('utfConvert', itemIndex) as boolean;
 
 			const pohodaUrl = `${credentials.baseUrl}/xml`;
-			// console.log(`Request to ${pohodaUrl}`, xmlRequest);
+			console.log(`Request to ${pohodaUrl}`, xmlRequest);
 			// curl -d @req.xml -X POST -H "STW-Authorization: Basic QDo=" -H "Content-Type: application/xml" http://10.0.111.111:3880/xml
 			const respBuffer = await scope.helpers.httpRequest({
 				method: 'POST',
@@ -783,7 +978,7 @@ export class PohodaNode implements INodeType {
 			const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
 			const respPack = jsonResponse["rsp:responsePack"] as any;
 
-			// console.log('respPack', JSON.stringify(respPack, null, 4));
+			console.log('respPack', JSON.stringify(respPack, null, 4));
 
 			if (respPack['@state'] != "ok") {
 				throw new NodeApiError(scope.getNode(), {
@@ -801,7 +996,7 @@ export class PohodaNode implements INodeType {
 
 			if (xmlOutputFormat)
 				returnData.push({
-					json: {xml: xmlStr},
+					json: {data: xmlStr},
 					pairedItem: itemIndex,
 				});
 			else if (respPackItem['prn:printResponse'] && respPackItem['prn:printResponse']['rdc:printDetails']) {
@@ -928,11 +1123,19 @@ export class PohodaNode implements INodeType {
 
 					await processXmlRequest(xmlRequest, itemIndex);
 
-				} else if (operation === 'import') {
+				} else if (operation === 'create') {
 					const actionEntity = this.getNodeParameter('resource', itemIndex) as string;
-					if (actionEntity === 'lst:listInvoiceRequest') {
-						console.error('Not implemented import for invoice');
+					const createEntity = this.getNodeParameter('createEntity', itemIndex) as any;
+					console.log('createEntity', createEntity);
+					let xmlRequest;
+					if (actionEntity === 'lAdb:listAddressBookRequest') {
+						xmlRequest = generateCreateRequest(credentials.ico as string, 'adb:addressbook', createEntity);
+					} else {
+						throw new NodeApiError(this.getNode(), {
+							message: `Not implemented for ${actionEntity}`
+						});
 					}
+					await processXmlRequest(xmlRequest, itemIndex);
 				} else if (operation === 'company-info') {
 					const xmlOutputFormat = scope.getNodeParameter('xmlOutput', itemIndex) as boolean;
 					const utfConvert = scope.getNodeParameter('utfConvert', itemIndex) as boolean;
@@ -955,7 +1158,7 @@ export class PohodaNode implements INodeType {
 					const jsonResponse = convert(xmlStr.replace("\ufeff", ""), {format: "object"}) as any;
 					if (xmlOutputFormat)
 						returnData.push({
-							json: {xml: xmlStr},
+							json: {data: xmlStr},
 							pairedItem: itemIndex,
 						});
 					else

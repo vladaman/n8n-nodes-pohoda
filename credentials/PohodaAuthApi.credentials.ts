@@ -3,13 +3,14 @@ import {
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
+	Icon
 } from 'n8n-workflow';
 
 export class PohodaAuthApi implements ICredentialType {
 	name = 'pohodaAuthApi';
 	displayName = 'Pohoda mServer API';
 	documentationUrl = 'https://github.com/vladaman/n8n-nodes-pohoda';
-	// icon = 'file:pohodaNode.png';
+	icon: Icon = 'file:pohodaNode.png';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Company ICO',

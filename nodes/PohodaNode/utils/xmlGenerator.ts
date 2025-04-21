@@ -9,6 +9,7 @@ export interface ListInvoicesFilter {
 	lastChanges?: string;
 	companyName?: string;
 	ico?: string; // Used for Invoices and lst:
+	dic?: string;
 	count?: number;
 	idFrom?: number;
 }
@@ -123,8 +124,26 @@ export function generatePrintRequest(entityIco: string, agenda: string, reportId
 	return xml.end({prettyPrint: true});
 }
 
+export function generateCreateRequest(entityIco: string, actionEntity: string, entity: any): string {
+	const xml = createRootEnvelope(entityIco);
+
+	const requestElement = xml.ele(actionEntity, {version: '2.0'});
+	let header = requestElement.ele('adb:addressbookHeader');
+
+	let identity = header.ele('adb:identity');
+	let address = identity.ele('typ:address');
+
+	for (let key in entity) {
+		address.ele('typ:' + key).txt(entity[key] || '').up();
+	}
+	address.up();
+	identity.up();
+	requestElement.up();
+	return xml.end({prettyPrint: true});
+}
+
 export function generateListRequest(entityIco: string, actionEntity: string, listAttrs: any, filter: ListInvoicesFilter, limit?: ListLimit): string {
-	const {id, extId, dateFrom, dateTill, lastChanges, ico, companyName} = filter;
+	const {id, extId, dateFrom, dateTill, lastChanges, ico, companyName, dic} = filter;
 
 	let reqEntity = listAttrs.request;
 	delete listAttrs.request;
@@ -153,6 +172,7 @@ export function generateListRequest(entityIco: string, actionEntity: string, lis
 		if (extId) filterElement.ele('ftr:extId').txt(extId).up();
 		if (dateFrom) filterElement.ele('ftr:dateFrom').txt(dateFrom).up();
 		if (dateTill) filterElement.ele('ftr:dateTill').txt(dateTill).up();
+		if (dic) filterElement.ele('ftr:dateTill').txt(dic).up();
 		if (lastChanges) filterElement.ele('ftr:lastChanges').txt(lastChanges).up();
 		if (companyName && prefix === 'lst') filterElement.ele('ftr:selectedCompanys').ele('ftr:company').txt(iconv.encode(companyName, "win1250").toString()).up();
 		else if (companyName) filterElement.ele('ftr:company').txt(companyName).up();
