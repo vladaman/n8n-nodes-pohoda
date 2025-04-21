@@ -513,17 +513,17 @@ export class PohodaNode implements INodeType {
 					},
 					{
 						"displayName": "Company",
-						"name": "company",
+						"name": "companyName",
 						"type": "string",
 						"default": "",
-						"description": "Kontrola duplicity v poli Firma."
+						"description": "Pole název Firmy"
 					},
 					{
 						"displayName": "Name",
 						"name": "name",
 						"type": "string",
 						"default": "",
-						"description": "Kontrola duplicity v poli Jméno."
+						"description": "Pole Jméno osoby"
 					},
 					{
 						"displayName": "IČO",
