@@ -1,0 +1,175 @@
+{
+	"name": "Pohoda Fetch Invocies",
+	"nodes": [
+		{
+			"parameters": {},
+			"type": "n8n-nodes-base.manualTrigger",
+			"typeVersion": 1,
+			"position": [
+				-340,
+				35
+			],
+			"id": "cf350e44-7e10-4bc3-a848-b676379b8b9b",
+			"name": "When clicking ‘Test workflow’"
+		},
+		{
+			"parameters": {
+				"conditions": {
+					"options": {
+						"caseSensitive": true,
+						"leftValue": "",
+						"typeValidation": "strict",
+						"version": 2
+					},
+					"conditions": [
+						{
+							"id": "3cf2b326-4e34-4872-87ec-a43095fa2d0d",
+							"leftValue": "={{ $itemIndex }}",
+							"rightValue": 9,
+							"operator": {
+								"type": "number",
+								"operation": "lt"
+							}
+						}
+					],
+					"combinator": "and"
+				},
+				"options": {}
+			},
+			"type": "n8n-nodes-base.if",
+			"typeVersion": 2.2,
+			"position": [
+				320,
+				35
+			],
+			"id": "99a66ec2-8dc9-48ac-8a1b-36809f833748",
+			"name": "Are we done?"
+		},
+		{
+			"parameters": {
+				"resource": "lAdb:listAddressBookRequest",
+				"filter": {},
+				"idFrom": "={{ $json.id_start }}"
+			},
+			"type": "CUSTOM.pohodaNode",
+			"typeVersion": 1,
+			"position": [
+				100,
+				-40
+			],
+			"id": "32600125-19b5-40fc-9ca2-672695ec693d",
+			"name": "Pohoda List Addresses",
+			"alwaysOutputData": true,
+			"credentials": {
+				"pohodaAuthApi": {
+					"id": "d8vEFRLN9HIg4Bdp",
+					"name": "Pohoda mServer Test"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"assignments": {
+					"assignments": [
+						{
+							"id": "ddc7ff69-253a-4986-872b-3917be916e18",
+							"name": "id_start",
+							"value": "={{ $json['adb:addressbookHeader']['adb:id'] }}",
+							"type": "string"
+						}
+					]
+				},
+				"options": {}
+			},
+			"type": "n8n-nodes-base.set",
+			"typeVersion": 3.4,
+			"position": [
+				-120,
+				35
+			],
+			"id": "3f1af560-7d0e-4b07-a85c-00412de56d67",
+			"name": "Set First Record ID"
+		},
+		{
+			"parameters": {},
+			"type": "n8n-nodes-base.noOp",
+			"typeVersion": 1,
+			"position": [
+				580,
+				40
+			],
+			"id": "b9a95da2-5450-4d2f-9dfb-aea7e6ac80ed",
+			"name": "No Operation, do nothing"
+		}
+	],
+	"pinData": {},
+	"connections": {
+		"When clicking ‘Test workflow’": {
+			"main": [
+				[
+					{
+						"node": "Set First Record ID",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Are we done?": {
+			"main": [
+				[
+					{
+						"node": "No Operation, do nothing",
+						"type": "main",
+						"index": 0
+					}
+				],
+				[
+					{
+						"node": "Set First Record ID",
+						"type": "main",
+						"index": 0
+					},
+					{
+						"node": "No Operation, do nothing",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Pohoda List Addresses": {
+			"main": [
+				[
+					{
+						"node": "Are we done?",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Set First Record ID": {
+			"main": [
+				[
+					{
+						"node": "Pohoda List Addresses",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"active": false,
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"versionId": "a940f495-6276-4bcb-b3fd-ea5ffd42060e",
+	"meta": {
+		"templateCredsSetupCompleted": true,
+		"instanceId": "70a8c93e665fdd7c7181bf55a720d4211cd9a7594ba48c55371673b7b6b3fc64"
+	},
+	"id": "42ZJiYQwr1bWvQhQ",
+	"tags": []
+}

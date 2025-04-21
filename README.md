@@ -13,8 +13,13 @@ nástroji.
 ![example_agent](docs/images/agent_example.png)
 #### Sestava faktura do PDF
 ![pdf_export](docs/images/pdf_export.png)
+#### Vytoření adresy
+![address_create](docs/images/address_create.png)
 #### Workflow, export do PDF a nahrání do AWS S3+DynamoDB
 ![pdf_export_dynamo](docs/images/pdf_export_dynamo.png)
+#### Export všech záznamů
+Export operace vrazí seznam entit, které odpovídají filtru. Doporučujeme použít následující strategorii pro loop více záznamů
+![loop_example](docs/images/loop_records.png)
 
 [n8n](https://n8n.io/) je platforma pro automatizaci
 workflow [licencovaná fair-code licencí](https://docs.n8n.io/reference/license/).
