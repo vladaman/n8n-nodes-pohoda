@@ -1,3 +1,4 @@
+/* eslint-disable n8n-nodes-base/node-param-display-name-miscased */
 import {
 	IExecuteFunctions,
 	INodeExecutionData,
@@ -16,26 +17,9 @@ import {
 import iconv from 'iconv-lite';
 import {convert} from 'xmlbuilder2';
 
+// eslint-disable n8n-nodes-base/node-param-display-name-miscased
 export class PohodaNode implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Pohoda Node',
-		name: 'pohodaNode',
-		group: ['transform'],
-		version: 1,
-		usableAsTool: true,
-		icon: 'file:pohodaNode.png',
-		description: 'Stormware Pohoda Integration Node',
-		defaults: {
-			name: 'Pohoda Node',
-		},
-		credentials: [
-			{
-				name: 'pohodaAuthApi',
-				required: true,
-			},
-		],
-
-		// Add AI tool metadata
 		codex: {
 			categories: ["Search", "Web"],
 			alias: ["web-search", "searxng", "search-engine"],
@@ -43,9 +27,24 @@ export class PohodaNode implements INodeType {
 				search: ["Web Search", "Metasearch"],
 			},
 		},
-
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+		credentials: [
+			{
+				name: 'pohodaAuthApi',
+				required: true,
+			},
+		],
+		defaults: {
+			name: 'Pohoda Node',
+		},
+		description: 'Stormware Pohoda Integration Node',
+		displayName: 'Pohoda Node',
+		group: ['transform'],
+		// eslint-disable-next-line n8n-nodes-base/node-class-description-icon-not-svg
+		icon: 'file:pohodaNode.png',
+		name: 'pohodaNode',
+		// eslint-disable-next-line n8n-nodes-base/node-class-description-inputs-wrong-regular-node
 		inputs: [NodeConnectionType.Main],
+		// eslint-disable-next-line n8n-nodes-base/node-class-description-outputs-wrong
 		outputs: [NodeConnectionType.Main],
 		properties: [
 			// Operation selection
@@ -78,98 +77,100 @@ export class PohodaNode implements INodeType {
 			{
 				displayName: 'Entity',
 				default: 'lst:listInvoiceRequest',
+				noDataExpression: true,
 				displayOptions: {
 					show: {
 						operation: ['export', 'create'],
 					},
 				},
 				name: 'resource',
+				// eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
 				options: [
 					{
 						name: 'Faktury',
 						value: 'lst:listInvoiceRequest',
-						description: 'Invoices agenda.',
+						description: 'Invoices agenda',
 						displayName: 'List Invoices'
 					},
 					{
 						name: 'Příjemky',
 						value: 'lst:listPrijemkaRequest',
-						description: 'Receipts agenda.',
+						description: 'Receipts agenda',
 					},
 					{
 						name: 'Prodejky',
 						value: 'lst:listProdejkaRequest',
-						description: 'Sales receipts agenda.',
+						description: 'Sales receipts agenda',
 					},
 					{
 						name: 'Objednávky',
 						value: 'lst:listOrderRequest',
-						description: 'Orders agenda.',
+						description: 'Orders agenda',
 					},
 					{
 						name: 'Výdejky',
 						value: 'lst:listVydejkaRequest',
-						description: 'Issues agenda.',
+						description: 'Issues agenda',
 					},
 					{
 						name: 'Pokladní doklady',
 						value: 'lst:listVoucherRequest',
-						description: 'Cash register documents agenda.',
+						description: 'Cash register documents agenda',
 					},
 					{
 						name: 'Nabídky',
 						value: 'lst:listOfferRequest',
-						description: 'Offers agenda.',
+						description: 'Offers agenda',
 					},
 					{
 						name: 'Výroba',
 						value: 'lst:listVyrobaRequest',
-						description: 'Production agenda.',
+						description: 'Production agenda',
 					},
 					{
 						name: 'Interní doklady',
 						value: 'lst:listIntDocRequest',
-						description: 'Internal documents agenda.',
+						description: 'Internal documents agenda',
 					},
 					{
 						name: 'Poptávky',
 						value: 'lst:listEnquiryRequest',
-						description: 'Enquiries agenda.',
+						description: 'Enquiries agenda',
 					},
 					{
 						name: 'Převod',
 						value: 'lst:listPrevodkaRequest',
-						description: 'Transfers agenda.',
+						description: 'Transfers agenda',
 					},
 					{
 						name: 'Banka',
 						value: 'lst:listBankRequest',
-						description: 'Bank agenda.',
+						description: 'Bank agenda',
 					},
 					{
 						name: 'Zakázky',
 						value: 'lst:listContractRequest',
-						description: 'Contracts agenda.',
+						description: 'Contracts agenda',
 					},
 					{
 						name: 'Pohyby',
 						value: 'lst:listMovementRequest',
-						description: 'Movements agenda.',
+						description: 'Movements agenda',
 					},
 					{
 						name: 'Účetní deník (PÚ)',
 						value: 'lst:listAccountancyRequest',
-						description: 'Accounting journal (PÚ) agenda.',
+						description: 'Accounting journal (PÚ) agenda',
 					},
 					{
 						name: 'Adresy',
 						value: 'lAdb:listAddressBookRequest',
-						description: 'Addresses agenda.',
+						description: 'Addresses agenda',
 					},
 					{
 						name: 'Zásoby',
 						value: 'lStk:listStockRequest',
-						description: 'Stock agenda.',
+						description: 'Stock agenda',
 					},
 					{
 						name: 'Prodejní ceny',
@@ -214,6 +215,7 @@ export class PohodaNode implements INodeType {
 				displayName: 'Entity',
 				type: 'options',
 				default: "adresar",
+				noDataExpression: true,
 				displayOptions: {
 					show: {
 						operation: ['print'],
@@ -224,182 +226,186 @@ export class PohodaNode implements INodeType {
 					{
 						name: 'Adresář',
 						value: 'adresar',
-						description: 'Seznam kontaktů a adres.'
+						description: 'Seznam kontaktů a adres'
 					},
 					{
 						name: 'Banka',
 						value: 'banka',
-						description: 'Informace o bankovních účtech a transakcích.'
+						description: 'Informace o bankovních účtech a transakcích'
 					},
 					{
+
 						name: 'Cenové akce',
 						value: 'cenove_akce',
-						description: 'Akce a slevy na produkty.'
+						description: 'Akce a slevy na produkty'
 					},
 					{
 						name: 'Cenové skupiny',
 						value: 'cenove_skupiny',
-						description: 'Skupiny cen produktů.'
+						description: 'Skupiny cen produktů'
 					},
 					{
 						name: 'Členění skladu',
 						value: 'cleneni_skladu',
-						description: 'Organizace a členění skladových položek.'
+						description: 'Organizace a členění skladových položek'
 					},
 					{
+
 						name: 'Evidenční čísla',
 						value: 'evidencni_cisla',
-						description: 'Seznam evidenčních čísel pro jednotlivé položky.'
+						description: 'Seznam evidenčních čísel pro jednotlivé položky'
 					},
 					{
 						name: 'Interní doklady',
 						value: 'interni_doklady',
-						description: 'Dokumenty používané uvnitř firmy.'
+						description: 'Dokumenty používané uvnitř firmy'
 					},
 					{
 						name: 'Inventura',
 						value: 'inventura',
-						description: 'Seznam položek při inventarizaci.'
+						description: 'Seznam položek při inventarizaci'
 					},
 					{
 						name: 'Inventurní seznamy',
 						value: 'inventurni_seznamy',
-						description: 'Seznamy pro inventarizaci zboží.'
+						description: 'Seznamy pro inventarizaci zboží'
 					},
 					{
 						name: 'Ostatní pohledávky',
 						value: 'ostatni_pohledavky',
-						description: 'Pohledávky, které nejsou zahrnuty v jiných kategoriích.'
+						description: 'Pohledávky, které nejsou zahrnuty v jiných kategoriích'
 					},
 					{
 						name: 'Ostatní závazky',
 						value: 'ostatni_zavazky',
-						description: 'Závazky, které nejsou zahrnuty v jiných kategoriích.'
+						description: 'Závazky, které nejsou zahrnuty v jiných kategoriích'
 					},
 					{
 						name: 'Pohyby',
 						value: 'pohyby',
-						description: 'Historie pohybů v účetnictví.'
+						description: 'Historie pohybů v účetnictví'
 					},
 					{
 						name: 'Pokladna',
 						value: 'pokladna',
-						description: 'Informace o pokladních transakcích.'
+						description: 'Informace o pokladních transakcích'
 					},
 					{
 						name: 'Převod',
 						value: 'prevod',
-						description: 'Převody mezi účty.'
+						description: 'Převody mezi účty'
 					},
 					{
 						name: 'Přijaté faktury',
 						value: 'prijate_faktury',
-						description: 'Faktury, které byly přijaty od dodavatelů.'
+						description: 'Faktury, které byly přijaty od dodavatelů'
 					},
 					{
 						name: 'Přijaté nabídky',
 						value: 'prijate_nabidky',
-						description: 'Nabídky od dodavatelů.'
+						description: 'Nabídky od dodavatelů'
 					},
 					{
 						name: 'Přijaté objednávky',
 						value: 'prijate_objednavky',
-						description: 'Objednávky, které byly přijaty od zákazníků.'
+						description: 'Objednávky, které byly přijaty od zákazníků'
 					},
 					{
 						name: 'Přijaté poptávky',
 						value: 'prijate_poptavky',
-						description: 'Poptávky od zákazníků.'
+						description: 'Poptávky od zákazníků'
 					},
 					{
 						name: 'Přijaté zálohové faktury',
 						value: 'prijate_zalohove_faktury',
-						description: 'Zálohové faktury, které byly přijaty.'
+						description: 'Zálohové faktury, které byly přijaty'
 					},
 					{
 						name: 'Přijemky',
 						value: 'prijemky',
-						description: 'Záznamy o přijetí zboží.'
+						description: 'Záznamy o přijetí zboží'
 					},
 					{
 						name: 'Prodejky',
 						value: 'prodejky',
-						description: 'Doklady o prodeji zboží.'
+						description: 'Doklady o prodeji zboží'
 					},
 					{
 						name: 'Prodejní ceny',
 						value: 'prodejni_ceny',
-						description: 'Ceny, za které se prodává zboží.'
+						description: 'Ceny, za které se prodává zboží'
 					},
 					{
 						name: 'Reklamace',
 						value: 'reklamace',
-						description: 'Záznamy o reklamovaných produktech.'
+						description: 'Záznamy o reklamovaných produktech'
 					},
 					{
+						// eslint-disable-next-line n8n-nodes-base/node-param-resource-with-plural-option
 						name: 'Servis',
 						value: 'servis',
-						description: 'Údržba a opravy produktů.'
+						description: 'Údržba a opravy produktů'
 					},
 					{
 						name: 'Sklady',
 						value: 'sklady',
-						description: 'Informace o skladech a jejich obsahu.'
+						description: 'Informace o skladech a jejich obsahu'
 					},
 					{
 						name: 'Uživatelská agenda',
 						value: 'uzivatelska_agenda',
-						description: 'Speciální agenda definována uživateli.'
+						description: 'Speciální agenda definována uživateli'
 					},
 					{
 						name: 'Vydané faktury',
 						value: 'vydane_faktury',
-						description: 'Faktury, které byly vydány zákazníkům.'
+						description: 'Faktury, které byly vydány zákazníkům'
 					},
 					{
 						name: 'Vydané nabídky',
 						value: 'vydane_nabidky',
-						description: 'Nabídky, které byly vydány zákazníkům.'
+						description: 'Nabídky, které byly vydány zákazníkům'
 					},
 					{
 						name: 'Vydané objednávky',
 						value: 'vydane_objednavky',
-						description: 'Objednávky, které byly vydány zákazníkům.'
+						description: 'Objednávky, které byly vydány zákazníkům'
 					},
 					{
+
 						name: 'Vydané poptávky',
 						value: 'vydane_poptavky',
-						description: 'Poptávky, které byly vydány dodavatelům.'
+						description: 'Poptávky, které byly vydány dodavatelům'
 					},
 					{
 						name: 'Vydané zálohové faktury',
 						value: 'vydane_zalohove_faktury',
-						description: 'Zálohové faktury, které byly vydány.'
+						description: 'Zálohové faktury, které byly vydány'
 					},
 					{
 						name: 'Výdejky',
 						value: 'vydejky',
-						description: 'Záznamy o výdeji zboží.'
+						description: 'Záznamy o výdeji zboží'
 					},
 					{
 						name: 'Výroba',
 						value: 'vyroba',
-						description: 'Záznamy o výrobě produktů.'
+						description: 'Záznamy o výrobě produktů'
 					},
 					{
 						name: 'Výrobní požadavky',
 						value: 'vyrobni_pozadavky',
-						description: 'Požadavky na výrobu.'
+						description: 'Požadavky na výrobu'
 					},
 					{
 						name: 'Zakázky',
 						value: 'zakazky',
-						description: 'Záznamy o zakázkách.'
+						description: 'Záznamy o zakázkách'
 					},
 					{
 						name: 'Zásoby',
 						value: 'zasoby',
-						description: 'Seznam všech skladových zásob.'
+						description: 'Seznam všech skladových zásob'
 					}
 				]
 			},
@@ -424,6 +430,7 @@ export class PohodaNode implements INodeType {
 					},
 				},
 				name: 'filter',
+				// eslint-disable-next-line n8n-nodes-base/node-param-collection-type-unsorted-items
 				options: [
 					{
 						displayName: 'ID',
@@ -739,8 +746,8 @@ export class PohodaNode implements INodeType {
 
 			// Invoice Header
 			{
-				default: {},
 				displayName: 'Invoice Header',
+				default: {},
 				displayOptions: {
 					show: {
 						operation: [
@@ -753,6 +760,7 @@ export class PohodaNode implements INodeType {
 					},
 				},
 				name: 'invoiceHeader',
+				// eslint-disable-next-line n8n-nodes-base/node-param-collection-type-unsorted-items
 				options: [
 					{
 						displayName: 'Invoice Type',
@@ -766,6 +774,7 @@ export class PohodaNode implements INodeType {
 							}
 						},
 						type: 'options',
+						// eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
 						options: [
 							{name: 'Issued Invoice', value: 'issuedInvoice'},
 							{name: 'Issued Credit Note', value: 'issuedCreditNotice'},
@@ -780,8 +789,7 @@ export class PohodaNode implements INodeType {
 						displayName: 'Invoice Number',
 						name: 'invoiceNumber',
 						type: 'string',
-						default: '',
-						description: 'The invoice number',
+						default: ''
 					},
 					{
 						displayName: 'Customer Name',
@@ -931,7 +939,7 @@ export class PohodaNode implements INodeType {
 				default: true
 			},
 			{
-				displayName: 'Delete file after print',
+				displayName: 'Delete File After Print',
 				name: 'deleteFile',
 				type: 'boolean',
 				default: true,
@@ -944,6 +952,9 @@ export class PohodaNode implements INodeType {
 				},
 			},
 		],
+		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+		usableAsTool: true,
+		version: 1,
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
